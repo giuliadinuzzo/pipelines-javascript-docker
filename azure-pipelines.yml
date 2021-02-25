@@ -1,14 +1,5 @@
-# Deploy to Azure Kubernetes Service
-- task: InstallFortifySCA@7
-  inputs:
-    InstallerPath: 'C:\Users\giulia.di.nuzzo\Accenture\SecMaterials.ICEG - Documents\Vendor\Microfocus\Fortify SCA\Fortify_SCA_and_Apps_20.1.1_windows_x64.exe'
-    VS2017: true
-    VS2019: true
-    LicenseFile: 'C:\Users\giulia.di.nuzzo\Accenture\SecMaterials.ICEG - Documents\Vendor\Microfocus\Accenture_EMEA_Static.txt'
-    RunFortifyRulepackUpdate: false
-# Build and push image to Azure Container Registry; Deploy to Azure Kubernetes Service
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
+# Deploy to Azure Kubernetes Service
 trigger:
 - master
 
@@ -28,8 +19,34 @@ variables:
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
-
 stages:
+- stage: Fortify
+displayName: Fortify
+  jobs:
+  - job: Fortify
+    displayName: Fortify
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+- task: InstallFortifySCA@7
+  inputs:
+    InstallerPath: 'C:\Users\giulia.di.nuzzo\Accenture\SecMaterials.ICEG - Documents\Vendor\Microfocus\Fortify SCA\Fortify_SCA_and_Apps_20.1.1_windows_x64.exe'
+    VS2017: true
+    VS2019: true
+    LicenseFile: 'C:\Users\giulia.di.nuzzo\Accenture\SecMaterials.ICEG - Documents\Vendor\Microfocus\Accenture_EMEA_Static.txt'
+    RunFortifyRulepackUpdate: false
+
+- task: FortifySCA@7
+  inputs:
+    licenseFile: 'C:\Users\giulia.di.nuzzo\Accenture\SecMaterials.ICEG - Documents\Vendor\Microfocus\Accenture_EMEA_Static.txt'
+    runBuildTranslate: false
+    fortifyBuildId: 'test_fortify'
+    runFortifyRulepackUpdate: false
+    runFortifyClean: true
+    scaVerbose: false
+    scaDebug: true
+    runFortifyScan: true
+    fortifyScanType: 'Local'
 - stage: Build
   displayName: Build stage
   jobs:
@@ -83,4 +100,3 @@ stages:
                 $(imagePullSecret)
               containers: |
                 $(containerRegistry)/$(imageRepository):$(tag)
-
