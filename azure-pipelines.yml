@@ -28,25 +28,45 @@
       pool:
         vmImage: $(vmImageName)
       steps:
-        - task: InstallFortifySCA@7
-          inputs:
-            InstallerPath: 'C:\Users\giulia.di.nuzzo\Accenture\SecMaterials.ICEG - Documents\Vendor\Microfocus\Fortify SCA\Fortify_SCA_and_Apps_20.1.1_windows_x64.exe'
-            VS2017: true
-            VS2019: true
-            LicenseFile: 'C:\Users\giulia.di.nuzzo\Accenture\SecMaterials.ICEG - Documents\Vendor\Microfocus\Accenture_EMEA_Static.txt'
-            RunFortifyRulepackUpdate: false
 
-        - task: FortifySCA@7
-          inputs:
-            licenseFile: 'C:\Users\giulia.di.nuzzo\Accenture\SecMaterials.ICEG - Documents\Vendor\Microfocus\Accenture_EMEA_Static.txt'
-            runBuildTranslate: false
-            fortifyBuildId: 'test_fortify'
-            runFortifyRulepackUpdate: false
-            runFortifyClean: true
-            scaVerbose: false
-            scaDebug: true
-            runFortifyScan: true
-            fortifyScanType: 'Local'
+# start VM
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: 'Azure Labs(c56bd57b-639e-4378-a70a-0484570ebb6d)'
+          scriptType: 'ps'
+          scriptLocation: 'inlineScript'
+          inlineScript: 'az vm start -g FDRGDN-rg -n FDRGDNvm'
+
+# install fortify sca
+      - task: InstallFortifySCA@7
+        inputs:
+          InstallerPath: '\home\azureuser\Fortify_SCA_and_Apps_20.1.1_linux_x64.run'
+          VS2017: true
+          VS2019: true
+          LicenseFile: '\home\azureuser\Accenture_EMEA_Static.txt'
+          RunFortifyRulepackUpdate: false
+
+# run fortify sca
+      - task: FortifySCA@7
+        inputs:
+          licenseFile: '\home\azureuser\Accenture_EMEA_Static.txt'
+          runBuildTranslate: false
+          fortifyBuildId: 'test_fortify_v01'
+          runFortifyRulepackUpdate: false
+          runFortifyClean: true
+          scaVerbose: false
+          scaDebug: true
+          runFortifyScan: true
+          fortifyScanType: 'Local'
+
+# stop VM
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: 'Azure Labs(c56bd57b-639e-4378-a70a-0484570ebb6d)'
+          scriptType: 'ps'
+          scriptLocation: 'inlineScript'
+          inlineScript: 'az vm stop -g FDRGDN-rg -n FDRGDNvm'
+
   - stage: Build
     displayName: Build stage
     jobs:
