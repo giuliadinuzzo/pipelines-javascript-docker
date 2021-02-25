@@ -1,4 +1,11 @@
 # Deploy to Azure Kubernetes Service
+- task: InstallFortifySCA@7
+  inputs:
+    InstallerPath: 'C:\Users\giulia.di.nuzzo\Accenture\SecMaterials.ICEG - Documents\Vendor\Microfocus\Fortify SCA\Fortify_SCA_and_Apps_20.1.1_windows_x64.exe'
+    VS2017: true
+    VS2019: true
+    LicenseFile: 'C:\Users\giulia.di.nuzzo\Accenture\SecMaterials.ICEG - Documents\Vendor\Microfocus\Accenture_EMEA_Static.txt'
+    RunFortifyRulepackUpdate: false
 # Build and push image to Azure Container Registry; Deploy to Azure Kubernetes Service
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
