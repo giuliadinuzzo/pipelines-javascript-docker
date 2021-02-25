@@ -21,7 +21,7 @@ variables:
 
 stages:
 - stage: Fortify
-displayName: Fortify
+  displayName: Fortify
   jobs:
   - job: Fortify
     displayName: Fortify
