@@ -33,7 +33,7 @@
       - task: AzureCLI@2
         inputs:
           azureSubscription: 'Azure Labs(c56bd57b-639e-4378-a70a-0484570ebb6d)'
-          scriptType: 'ps'
+          scriptType: 'bash'
           scriptLocation: 'inlineScript'
           inlineScript: 'az vm start -g FDRGDN-rg -n FDRGDNvm'
 
@@ -63,7 +63,7 @@
       - task: AzureCLI@2
         inputs:
           azureSubscription: 'Azure Labs(c56bd57b-639e-4378-a70a-0484570ebb6d)'
-          scriptType: 'ps'
+          scriptType: 'bash'
           scriptLocation: 'inlineScript'
           inlineScript: 'az vm stop -g FDRGDN-rg -n FDRGDNvm'
 
