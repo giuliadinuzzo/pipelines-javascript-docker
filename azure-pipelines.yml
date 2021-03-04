@@ -95,7 +95,6 @@
     jobs:
     - deployment: Deploy
       displayName: Deploy
-      dependsOn: Build
       pool:
         vmImage: $(vmImageName)
       environment: 'giuliadinuzzopipelinesjavascriptdocker.fdrgdn-ns'
