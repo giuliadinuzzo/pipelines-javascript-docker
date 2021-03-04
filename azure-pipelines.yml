@@ -37,7 +37,6 @@
           inlineScript: 'az vm start -g FDRGDN-rg -n FDRGDNvm'
 
 # install fortify sca
-  stages:
   - stage: RunFortifySCA
     displayName: 'Run Fortify SCA'
     jobs:
@@ -57,7 +56,6 @@
 
 
 # stop VM
-  stages:
   - stage: StopUpVM
     displayName: 'Stop Up VM'
     jobs:
