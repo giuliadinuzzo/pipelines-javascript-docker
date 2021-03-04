@@ -19,30 +19,29 @@
     # Agent VM image name
     vmImageName: 'ubuntu-latest'
 
-# start VM
   stages:
-  - stage: StartUpVM
-    displayName: 'Start Up VM'
+  - stage: FortifyDeploy
+    displayName: 'Fortify Deploy'
     jobs:
-    - job: AzureCLIStart
-      displayName: 'Azure CLI'
+
+    # start VM
+    - job: StartUpVM
+      displayName: 'StartUpVM'
       pool:
         name: 'Azure Pipelines'
       steps:
       - task: AzureCLI@2
+        displayName: 'AzureCLIStart'
         inputs:
           azureSubscription: 'Azure Labs(c56bd57b-639e-4378-a70a-0484570ebb6d)'
           scriptType: 'ps'
           scriptLocation: 'inlineScript'
           inlineScript: 'az vm start -g FDRGDN-rg -n FDRGDNvm'
 
-# install fortify sca
-  - stage: RunFortifySCA
-    displayName: 'Run Fortify SCA'
-    jobs:
-    - job: Install
-      displayName: 'Install Fortify SCA on agent'
-      dependsOn: AzureCLIStart
+    # install fortify sca
+    - job: Fortify
+      displayName: 'Fortify'
+      dependsOn: StartUpVM
       pool:
         name: default
       steps:
@@ -54,14 +53,10 @@
           LicenseFile: '/home/azureuser/Accenture_EMEA_Static.txt'
           RunFortifyRulepackUpdate: false
 
-
-# stop VM
-  - stage: StopUpVM
-    displayName: 'Stop Up VM'
-    jobs:
-    - job: AzureCLIStop
-      displayName: 'Azure CLI'
-      dependsOn: Install
+    # stop VM
+    - job: StopVM
+      displayName: 'StopVM'
+      dependsOn: Fortify
       pool:
         name: 'Azure Pipelines'
       steps:
@@ -74,10 +69,10 @@
 
   - stage: Build
     displayName: Build stage
+    dependsOn: FortifyDeploy
     jobs:
     - job: Build
       displayName: Build
-      dependsOn: AzureCLIStop
       pool:
         vmImage: $(vmImageName)
       steps:
@@ -97,7 +92,6 @@
   - stage: Deploy
     displayName: Deploy stage
     dependsOn: Build
-
     jobs:
     - deployment: Deploy
       displayName: Deploy
