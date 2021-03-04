@@ -19,51 +19,58 @@
     # Agent VM image name
     vmImageName: 'ubuntu-latest'
 
-  stages:
-  - stage: Fortify
-    displayName: Fortify
-    jobs:
-    - job: Fortify
-      displayName: Fortify
-      pool:
-        vmImage: $(vmImageName)
-      steps:
-
 # start VM
+  stages:
+  - stage: StartUpVM
+    displayName: 'Start Up VM'
+    jobs:
+    - job: AzureCLIStart
+      displayName: 'Azure CLI'
+      pool:
+        name: 'Azure Pipelines'
+      steps:
       - task: AzureCLI@2
         inputs:
           azureSubscription: 'Azure Labs(c56bd57b-639e-4378-a70a-0484570ebb6d)'
-          scriptType: 'bash'
+          scriptType: 'ps'
           scriptLocation: 'inlineScript'
           inlineScript: 'az vm start -g FDRGDN-rg -n FDRGDNvm'
 
 # install fortify sca
+  stages:
+  - stage: RunFortifySCA
+    displayName: 'Run Fortify SCA'
+    jobs:
+    - job: Install
+      displayName: 'Install Fortify SCA on agent'
+      dependsOn: AzureCLIStart
+      pool:
+        name: default
+      steps:
       - task: InstallFortifySCA@7
         inputs:
-          InstallerPath: '\home\azureuser\Fortify_SCA_and_Apps_20.1.1_linux_x64.run'
+          InstallerPath: '/home/azureuser/Fortify_SCA_and_Apps_20.1.1_linux_x64.run'
           VS2017: true
           VS2019: true
-          LicenseFile: '\home\azureuser\Accenture_EMEA_Static.txt'
+          LicenseFile: '/home/azureuser/Accenture_EMEA_Static.txt'
           RunFortifyRulepackUpdate: false
 
-# run fortify sca
-      - task: FortifySCA@7
-        inputs:
-          licenseFile: '\home\azureuser\Accenture_EMEA_Static.txt'
-          runBuildTranslate: false
-          fortifyBuildId: 'test_fortify_v01'
-          runFortifyRulepackUpdate: false
-          runFortifyClean: true
-          scaVerbose: false
-          scaDebug: true
-          runFortifyScan: true
-          fortifyScanType: 'Local'
 
 # stop VM
+  stages:
+  - stage: StopUpVM
+    displayName: 'Stop Up VM'
+    jobs:
+    - job: AzureCLIStop
+      displayName: 'Azure CLI'
+      dependsOn: Install
+      pool:
+        name: 'Azure Pipelines'
+      steps:
       - task: AzureCLI@2
         inputs:
           azureSubscription: 'Azure Labs(c56bd57b-639e-4378-a70a-0484570ebb6d)'
-          scriptType: 'bash'
+          scriptType: 'ps'
           scriptLocation: 'inlineScript'
           inlineScript: 'az vm stop -g FDRGDN-rg -n FDRGDNvm'
 
@@ -72,6 +79,7 @@
     jobs:
     - job: Build
       displayName: Build
+      dependsOn: AzureCLIStop
       pool:
         vmImage: $(vmImageName)
       steps:
@@ -95,6 +103,7 @@
     jobs:
     - deployment: Deploy
       displayName: Deploy
+      dependsOn: Build
       pool:
         vmImage: $(vmImageName)
       environment: 'giuliadinuzzopipelinesjavascriptdocker.fdrgdn-ns'
