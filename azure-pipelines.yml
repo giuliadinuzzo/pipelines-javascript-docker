@@ -28,7 +28,8 @@
     - job: StartUpVM
       displayName: 'StartUpVM'
       pool:
-        name: 'Azure Pipelines'
+        name: 'Azure Pipeline'
+        vmImage: 'vs2017-win2016'
       steps:
       - task: AzureCLI@2
         displayName: 'AzureCLIStart'
@@ -58,7 +59,8 @@
       displayName: 'StopVM'
       dependsOn: Fortify
       pool:
-        name: 'Azure Pipelines'
+        name: 'Azure Pipeline'
+        vmImage: 'vs2017-win2016'
       steps:
       - task: AzureCLI@2
         inputs:
